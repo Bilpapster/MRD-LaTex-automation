@@ -2,6 +2,8 @@ import numpy as np
 import pandas as pd
 from collections import OrderedDict
 import jinja2
+import numpy as np
+from PIL import Image, ImageDraw
 
 
 def numerize_award_name(df):
@@ -11,7 +13,7 @@ def numerize_award_name(df):
     To be used in the read_input_file function.
 
     :param df: the dataframe which contains an awards column with values 
-        from the set {'best_delegate',, 'future_diplomat', 'citation'}
+        from the set {'best_delegate', 'future_diplomat', 'citation'}
     :return: the resulting dataframe
     """
     column = 'AwardName'
@@ -27,6 +29,49 @@ def numerize_award_name(df):
             df.loc[i, column] = 3
 
     return df
+
+
+def make_image_round(image_path, position):
+    """
+    First the function crops a square of the middle of the image, which square has 
+    a side of the smallest of the two dimensions of the image. Then it crops a circle
+    of the image with a diameter the same as the side of the square. The final image 
+    is stored in the images folder of the resulting latex file. 
+
+    :param image_path: the path of the image in the system
+    :param postition: a number which denotes the position of the image in the template file
+    """
+    img = Image.open(image_path)
+    h = img.height
+    w = img.width
+    
+    # crops the image to make it square
+    if h <= w:
+        margin = (w-h)/2
+        img = img.crop((margin, 0, w-margin, h))
+        min_dimension = h
+    else:
+        margin = (h-w)/2
+        img = img.crop((0, margin, w, h-margin))
+        min_dimension = w
+
+    # Open the input image as numpy array, convert to RGB
+    img = img.convert("RGB")
+    npImage = np.array(img)
+
+    # Create same size alpha layer with circle
+    alpha = Image.new('L', img.size,0)
+    draw = ImageDraw.Draw(alpha)
+    draw.pieslice(((0,0),(min_dimension,min_dimension)),0,360,fill=255) # create the circle
+
+    # Convert alpha Image to numpy array
+    npAlpha=np.array(alpha)
+
+    # Add alpha layer to RGB
+    npImage=np.dstack((npImage,npAlpha))
+
+    # Save with alpha
+    Image.fromarray(npImage).save(f'resulting_slides/images/image{position}.png')
 
 
 def read_input_file(path):
@@ -52,14 +97,25 @@ def read_input_file(path):
         content_dict["surname"+pos] = df['StudentSurname'][i]
         content_dict["name"+pos] = df['StudentName'][i]
         content_dict["country"+pos] = df['Country'][i] 
-        content_dict["award"+pos] = df['AwardName'][i]
-        content_dict["photo_file_path"+pos] = df['PhotoFilePath'][i]
+        award = df['AwardName'][i]
+        if award == 1:
+            content_dict["award"+pos] = 'Βραβείο Καλύτερου Εμπειρογνώμονα'
+        elif award == 2:
+            content_dict["award"+pos] = 'Βραβείο Μελλοντικού Διπλομάτη'
+        else:
+            content_dict["award"+pos] = 'Εύφυμος Μνεία'
+        image = df['PhotoFilePath'][i]
+        if image != '':
+            # content_dict['image'+pos] = make_image_round(image, i)
+            make_image_round('content_input/Screenshot 2024-01-08 101415.png', pos)
+        else:
+            content_dict['image'+pos]
 
     return content_dict
 
 
-path = "content_input/content_file.csv"
-content_dict = read_input_file(path)
+input_path = "content_input/content_file.csv"
+content_dict = read_input_file(input_path)
 
 environment = jinja2.Environment(
     loader=jinja2.PackageLoader("make_content"),
