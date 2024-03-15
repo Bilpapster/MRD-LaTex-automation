@@ -97,6 +97,7 @@ def read_input_file(path):
         content_dict["surname"+pos] = df['StudentSurname'][i]
         content_dict["name"+pos] = df['StudentName'][i]
         content_dict["country"+pos] = df['Country'][i] 
+
         award = df['AwardName'][i]
         if award == 1:
             content_dict["award"+pos] = 'Βραβείο Καλύτερου Εμπειρογνώμονα'
@@ -104,12 +105,17 @@ def read_input_file(path):
             content_dict["award"+pos] = 'Βραβείο Μελλοντικού Διπλομάτη'
         else:
             content_dict["award"+pos] = 'Εύφυμος Μνεία'
+
         image = df['PhotoFilePath'][i]
-        if image != '':
-            # content_dict['image'+pos] = make_image_round(image, i)
-            make_image_round('content_input/Screenshot 2024-01-08 101415.png', pos)
-        else:
-            content_dict['image'+pos]
+        try: # checks if there is a problem with the image path and if it is empty
+            make_image_round(image, pos)
+        except:
+            gender = df['gender'][i]
+            if gender == 'female':
+                img = Image.open('templates/images/female portrait image.png')
+            else:
+                img = Image.open('templates/images/male portrait image.png')
+            img.save(f'resulting_slides/images/image{pos}.png')
 
     return content_dict
 
