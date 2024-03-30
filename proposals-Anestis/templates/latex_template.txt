@@ -1,0 +1,37 @@
+\documentclass[12pt, letterpaper]{article}
+\usepackage{fullpage}
+\usepackage[english,greek]{babel}
+\usepackage[headsep=0cm, headheight=94pt, bottom=2cm]{geometry}
+\usepackage{graphicx}
+\usepackage[skip=10pt plus1pt, indent=0pt]{parskip}
+\usepackage{fancyhdr}
+\usepackage{times}
+\usepackage{libertine}
+\usepackage[export]{adjustbox}
+
+\begin{document}
+\pagestyle{fancy}
+\fancyfoot{}
+\fancyhead[R]{\includegraphics[scale=0.07]{images/mrd_logo.png}}
+\renewcommand{\headrulewidth}{0pt}
+\normalsize
+
+
+\textbf{ΓΝΩΜΗ}
+
+\textbf{Εισηγητής:} {jnj speaker_country jnj}
+
+\textbf{Υποστηρικτές/τριες:} {% for supp in supporters %}{jnj supp jnj}{%- if not loop.last %}, {% endif -%}{% endfor %}
+\vspace{5 mm}
+\textbf{Η επιτροπή «{jnj name_of_committee jnj}» με θέμα ημερήσιας διάταξης «{jnj name_of_topic jnj}»,}
+\vspace{5 mm}{% for first_words_base,remaining_base in zipped_bases %}
+\textit{{jnj first_words_base jnj}} {jnj remaining_base jnj},
+{% endfor %}
+\begin{enumerate}
+  {% for first_words_prop,remaining_prop in zipped_proposals %}
+  \item \textbf{{jnj first_words_prop jnj}} {jnj remaining_prop jnj}.
+  {% endfor %}
+\end{enumerate}
+
+
+\end{document}
